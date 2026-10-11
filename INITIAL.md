@@ -1,6 +1,6 @@
-# INITIAL.md - Define Your Product
+# INITIAL.md - Product Definition
 
-> Fill this out, then run `/generate-prp INITIAL.md`
+> Edit this, then run `/generate-prp INITIAL.md`
 
 ---
 
@@ -8,57 +8,12 @@
 
 **Name:** Tic Tac Toe
 
-**Description:** 
-This application is designed for casual mobile gamers, commuters seeking quick mental breaks, and children learning basic strategic thinking. Because it is strictly single-player against the computer, it targets users who want instant, offline gameplay without waiting for online matchmaking or coordinating with friends.
+**Description:**
+A minimalist, strictly single-player Tic Tac Toe game for Android. The human always plays X and moves first; the computer always plays O. It works fully offline, with instant play and no matchmaking.
 
-To get the best results from Claude Code, structure your request using the RISE framework (Role, Input, Steps, Expectation) to ensure the generated architecture and code are production-ready.
+**Target users:** Casual mobile gamers, commuters wanting a quick mental break, and children learning basic strategic thinking.
 
-Copy and paste the following specification directly into your terminal environment:
-
-Role:
-Act as an Expert Android Developer and Game Architect specializing in Kotlin and Jetpack Compose.
-
-Input:
-I need a complete Android mobile application for a Tic Tac Toe game. The app must be exclusively single-player, where the human user always plays against a computer AI opponent.
-
-Steps:
-
-Scaffold the Project: Initialize a modern Android project using Kotlin and Jetpack Compose for the UI layer. Ensure a clean, decoupled architecture (MVVM).
-
-Design the UI/UX:
-
-Create a modern, minimalist interface centered around a responsive 3x3 grid.
-
-Include a top header displaying the current scores (Player vs. Computer) and the current turn indicator.
-
-Add a "Restart Game" button to clear the board without resetting the total session score.
-
-Add a "Reset Score" button to clear the session tally.
-
-Implement Game Mechanics:
-
-The human player is always 'X' and goes first. The computer is always 'O'.
-
-Standard Tic Tac Toe rules apply: first to align 3 symbols horizontally, vertically, or diagonally wins.
-
-Implement immediate win/draw detection after every move.
-
-Develop the AI Opponent:
-
-Implement two difficulty levels:
-
-Easy: The computer selects a random available empty cell.
-
-Unbeatable: The computer uses the Minimax algorithm to ensure it either wins or forces a draw.
-
-Add a slight, artificial delay (e.g., 500ms) to the computer's move so it feels natural rather than instantaneous.
-
-Manage State: Use Kotlin StateFlow or LiveData within a ViewModel to manage board state, score tallies, and active player turns, ensuring the UI recomposes efficiently.
-
-Expectation:
-Generate the necessary project structure, build.gradle dependencies, and the complete, well-documented Kotlin code for the UI components, ViewModel, and Game Logic. The output should be ready to compile and run on an Android emulator or physical device without requiring major logic corrections
-
-**Type:** SaaS
+**Type:** Native Android app (offline, single-player)
 
 ---
 
@@ -66,87 +21,80 @@ Generate the necessary project structure, build.gradle dependencies, and the com
 
 | Layer | Choice |
 |-------|--------|
-| Backend | FastAPI + Python |
-| Frontend | React + TypeScript + Vite |
-| Database | PostgreSQL |
-| Auth | JWT + Google OAuth |
-| UI | Chakra UI / Tailwind |
-| Payments | None / Stripe / Dodo |
+| Platform | Android (minSdk 24, compileSdk/targetSdk 36) |
+| Language | Kotlin 2.1 |
+| UI | Jetpack Compose + Material 3 |
+| Architecture | MVVM, `ViewModel` + `StateFlow` |
+| Async | Kotlin Coroutines |
+| Build | Gradle (Kotlin DSL), AGP 8.13 |
+| Backend / Database / Auth | None |
+| Payments | None |
 
 ---
 
 ## MODULES
 
-### Module 1: Authentication (Built-in)
+### Module 1: Game Engine (pure Kotlin)
 
-**Models:** User, RefreshToken
+**Types:** `Player`, `Cell`, `Difficulty`, `GameStatus` (InProgress, Won(winner, line), Draw), `Score`, `GameUiState`
 
-**Endpoints:**
-- POST /auth/register, /auth/login, /auth/refresh
-- GET /auth/me, /auth/google
+**Logic:**
+- `GameRules.evaluate(board)`: win on any of 8 lines, draw when the board is full
+- `RandomAi`: random empty cell (Easy)
+- `MinimaxAi`: Minimax with alpha-beta and depth-aware scoring, never loses (Unbeatable)
+- `AiFactory`: Difficulty to strategy
 
-**Pages:** /login, /register, /profile
+### Module 2: Game State
 
----
+**`GameViewModel`** exposes `uiState: StateFlow<GameUiState>`:
+- `onCellClicked(index)`, `onRestartGame()`, `onResetScore()`, `onDifficultyChanged(difficulty)`
+- The computer moves after a 500 ms delay; pending moves are cancelled on restart, reset or difficulty change
+- Score is incremented once per finished round
 
-### Module 2: [Your Core Module]
+### Module 3: Game UI (Compose)
 
-**Description:** [What does this module do?]
+**Screen:** a single `GameScreen`
+- Header with scores (You / Draws / Computer) and turn or result text
+- Difficulty selector (Easy / Unbeatable)
+- Responsive 3x3 board with animated X/O marks and winning-line highlight
+- "Restart Game" (keeps score) and "Reset Score" buttons
+- Portrait and landscape layouts, accessible cell descriptions
 
-**Models:**
-```
-[ModelName]:
-  - id, user_id (FK)
-  - [field]: [type]
-  - created_at, updated_at
-```
+### Module 4: Quality and Release
 
-**Endpoints:**
-```
-GET    /api/[resource]      - List all
-POST   /api/[resource]      - Create
-GET    /api/[resource]/{id} - Get one
-PUT    /api/[resource]/{id} - Update
-DELETE /api/[resource]/{id} - Delete
-```
-
-**Pages:**
-```
-/[resource]           - List
-/[resource]/new       - Create
-/[resource]/{id}      - Detail
-/[resource]/{id}/edit - Edit
-```
-
----
-
-### Module 3: [Another Module]
-
-[Same structure as above]
-
----
-
-### Module 4: Dashboard (Optional)
-
-**Pages:** /dashboard, /settings
+- Unit tests (rules, both AIs, ViewModel), Compose UI tests
+- ktlint, Android lint, JaCoCo coverage
+- GitHub Actions CI, signed release APK, GitHub release
 
 ---
 
 ## MVP SCOPE
 
 Must Have:
-- [x] User registration/login
-- [ ] [Core feature 1]
-- [ ] [Core feature 2]
+- [x] 3x3 grid, human X first, computer O
+- [x] Immediate win and draw detection
+- [x] Easy (random) and Unbeatable (Minimax) AI
+- [x] 500 ms computer move delay
+- [x] Scores, turn indicator, Restart Game, Reset Score
+- [x] StateFlow-based MVVM
+
+Later (optional):
+- [ ] Persist scores across app restarts (DataStore)
+- [ ] Confirmation before Reset Score
+- [ ] Tablet layout width cap
+- [ ] Google Play release (AAB, Play App Signing)
 
 ---
 
 ## ACCEPTANCE CRITERIA
 
-- [ ] Users can register and login
-- [ ] Users can CRUD their [resources]
-- [ ] 80%+ test coverage
-- [ ] Docker builds successfully
+- [x] The app compiles and runs on a device without changes
+- [x] The unbeatable AI never loses (verified by an exhaustive test)
+- [x] The computer waits about 500 ms and the board ignores taps while it thinks
+- [x] Restart keeps the score; Reset Score clears it
+- [x] State survives rotation
+- [x] 80%+ coverage on the domain layer and ViewModel
+- [x] Lint and ktlint pass; CI builds
 
 ---
 
