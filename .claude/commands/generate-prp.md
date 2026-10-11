@@ -1,9 +1,9 @@
 # Generate PRP Command
 
-You are a **Product PRP Generator**. Create a focused implementation blueprint for a MicroSaaS product.
+You are a **Product PRP Generator**. Create a focused implementation blueprint for a native **Android** app (Kotlin + Jetpack Compose).
 
 ## Input
-Read the product definition file: $ARGUMENTS (defaults to INITIAL.md)
+Read the product definition file: INITIAL.md (defaults to INITIAL.md)
 
 ---
 
@@ -23,21 +23,22 @@ Extract from the input file:
 PRODUCT:
   name: [Product name]
   description: [What it does]
-  type: [SaaS, Marketplace, Platform, etc.]
+  target_users: [Who it is for]
 
 TECH_STACK:
-  backend: [FastAPI / Express / Django]
-  frontend: [React / Next.js / Vue]
-  database: [PostgreSQL / MySQL / MongoDB]
-  auth: [JWT / Session / Auth0]
-  ui: [Chakra UI / Tailwind + shadcn / MUI]
-  payments: [Stripe / Dodo / LemonSqueezy / None]
+  platform: [Android, minSdk / compileSdk / targetSdk]
+  language: [Kotlin version]
+  ui: [Jetpack Compose + Material 3]
+  architecture: [MVVM, ViewModel + StateFlow]
+  persistence: [None / DataStore / Room]
+  network: [None / Retrofit / Ktor]
+  auth: [None / Google Sign-In / Firebase]
 
 MODULES:
   - name: [Module 1]
-    models: [List of entities]
-    endpoints: [List of API endpoints]
-    pages: [List of UI pages]
+    types: [Data classes, enums, sealed types]
+    logic: [Pure Kotlin classes and functions]
+    screens: [Composable screens and key components]
 
 MVP_SCOPE:
   - [Feature 1]
@@ -48,33 +49,37 @@ ACCEPTANCE_CRITERIA:
   - [Criterion 2]
 ```
 
+**If INITIAL.md contradicts itself** (for example an Android description next to a web tech stack table), ask the user which target to use before generating. Do not guess.
+
 ---
 
 ## Step 2: Map Agents to Modules
 
 ```yaml
-DATABASE-AGENT:
-  models: [All models from all modules]
-  skills: [skills/DATABASE.md]
+BACKEND-AGENT:        # domain + state
+  modules: [Pure-Kotlin logic, AI/algorithms, ViewModels]
+  skills: [skills/BACKEND.md]   # principles only
 
-BACKEND-AGENT:
-  modules: [All modules needing API]
-  skills: [skills/BACKEND.md]
-
-FRONTEND-AGENT:
-  modules: [All modules needing UI]
-  skills: [skills/FRONTEND.md]
+FRONTEND-AGENT:       # Compose
+  modules: [Screens, components, theme, strings.xml]
+  skills: [skills/FRONTEND.md]  # principles only
 
 DEVOPS-AGENT:
-  tasks: [Docker, CI/CD, environments]
+  tasks: [Gradle + version catalog, manifest, CI workflow, lint/ktlint, signing]
   skills: [skills/DEPLOYMENT.md]
 
 TEST-AGENT:
-  coverage: [All modules]
+  coverage: [Unit tests for domain + ViewModel, Compose UI tests]
   skills: [skills/TESTING.md]
 
 REVIEW-AGENT:
-  review: [Security, performance, code quality]
+  review: [Correctness, coroutine/concurrency, accessibility, manifest/permissions]
+
+RESEARCH-AGENT:
+  research: [Library/AGP/Kotlin compatibility, Play target-SDK rules, API stability]
+
+DATABASE-AGENT:
+  only_if: persistence is Room/DataStore, otherwise unused
 ```
 
 ---
@@ -95,7 +100,7 @@ Create `PRPs/[product-name-kebab-case]-prp.md` with this structure:
 | Field | Value |
 |-------|-------|
 | **Product** | [Name] |
-| **Type** | [SaaS / Marketplace / etc.] |
+| **Type** | Native Android app |
 | **Version** | 1.0 |
 | **Created** | [Date] |
 | **Complexity** | [Low / Medium / High] |
@@ -105,105 +110,103 @@ Create `PRPs/[product-name-kebab-case]-prp.md` with this structure:
 ## PRODUCT OVERVIEW
 
 **Description:** [What this product does]
-
-**Value Proposition:** [Why users will pay]
+**Target users:** [Who]
+**Value Proposition:** [Why users want it]
 
 **MVP Scope:**
 - [ ] [Feature 1]
 - [ ] [Feature 2]
-- [ ] [Feature 3]
+
+**Out of scope:** [Explicit list]
 
 ---
 
 ## TECH STACK
 
-| Layer | Technology | Skill Reference |
-|-------|------------|-----------------|
-| Backend | [FastAPI + Python 3.11+] | skills/BACKEND.md |
-| Frontend | [React + TypeScript + Vite] | skills/FRONTEND.md |
-| Database | [PostgreSQL + SQLAlchemy] | skills/DATABASE.md |
-| Auth | [JWT + bcrypt] | skills/BACKEND.md |
-| UI | [Chakra UI / Tailwind] | skills/FRONTEND.md |
-| Testing | [pytest + RTL] | skills/TESTING.md |
-| Deployment | [Docker + GitHub Actions] | skills/DEPLOYMENT.md |
+| Layer | Technology |
+|-------|------------|
+| Language | Kotlin [version], JVM 17 |
+| UI | Jetpack Compose + Material 3 |
+| Architecture | MVVM, unidirectional data flow, ViewModel + StateFlow |
+| Async | Coroutines |
+| Persistence / Network | [None or choice] |
+| Testing | JUnit, kotlinx-coroutines-test, Turbine, Compose UI test |
+| Build | Gradle Kotlin DSL, version catalog, AGP [version] |
+| CI | GitHub Actions |
+
+**SDK:** minSdk [n], compileSdk/targetSdk [n]. Package: `[com.example.app]`.
 
 ---
 
-## DATABASE MODELS
+## DATA MODELS (in-memory Kotlin types, or Room entities if persisted)
 
-### User Model
-- id, email, hashed_password, full_name, is_active, is_verified, oauth_provider, created_at
-
-### [Other Models]
-[List each model with key fields and relationships]
+[Kotlin snippets of enums, sealed interfaces and data classes, including the UI state class]
 
 ---
 
 ## MODULES
 
-### Module 1: Authentication
-**Agents:** DATABASE-AGENT + BACKEND-AGENT + FRONTEND-AGENT
+### Module 1: [Domain / Engine]
+**Agents:** BACKEND-AGENT + TEST-AGENT
+[Components, responsibilities, public API contract]
 
-**Backend Endpoints:**
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | /auth/register | Create account |
-| POST | /auth/login | Get tokens |
-| POST | /auth/refresh | Refresh token |
-| GET | /auth/me | Current user |
+### Module 2: [State / ViewModel]
+**Agents:** BACKEND-AGENT
+[State flow, intents, side effects, cancellation rules, injected dependencies]
 
-**Frontend Pages:**
-| Route | Page | Components |
-|-------|------|------------|
-| /login | LoginPage | LoginForm, GradientButton |
-| /register | RegisterPage | RegisterForm |
+### Module 3: [UI]
+**Agents:** FRONTEND-AGENT
+| Component | Description |
+|-----------|-------------|
+| [Screen / composable] | [What it shows and how it behaves] |
+
+[UX rules: touch targets >= 48dp, strings in strings.xml, rotation survival, accessibility]
+
+### Module 4: Project Scaffold & Quality
+**Agents:** DEVOPS-AGENT
+[Gradle, manifest, lint/ktlint, CI, signing]
 
 ---
 
-### Module 2: [Core Module]
-**Agents:** BACKEND-AGENT + FRONTEND-AGENT
+## FILE STRUCTURE
 
-**Backend Endpoints:**
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | /api/[resource] | List all |
-| POST | /api/[resource] | Create |
-| GET | /api/[resource]/{id} | Get one |
-| PUT | /api/[resource]/{id} | Update |
-| DELETE | /api/[resource]/{id} | Delete |
+[Tree under app/src/main, test, androidTest]
 
-**Frontend Pages:**
-| Route | Page | Components |
-|-------|------|------------|
-| /[route] | [Page] | [Components] |
+---
 
-[Repeat for each module]
+## AGENT MAPPING
+
+[Table of agents, responsibilities, skills]
 
 ---
 
 ## PHASE EXECUTION PLAN
 
-**Phase 1: Foundation (4 agents in parallel)**
-- DATABASE-AGENT: All models, migrations, database.py
-- BACKEND-AGENT: main.py, config.py, project structure
-- FRONTEND-AGENT: Vite setup, folder structure, base components
-- DEVOPS-AGENT: Docker, CI/CD, env files
+**Phase 1: Foundation (parallel)**
+- DEVOPS-AGENT: Gradle project, manifest, version catalog, CI, lint
+- BACKEND-AGENT: shared types + core rules (the contract other agents code against)
+- FRONTEND-AGENT: theme, strings.xml, MainActivity, base components
 
-**Validation Gate 1:** pip install, alembic upgrade, npm install, docker-compose config
+**Validation Gate 1:** `./gradlew assembleDebug`
 
-**Phase 2: Modules (backend + frontend parallel per module)**
-- Auth Module: JWT endpoints + Login/Register pages
-- [Module 2]: API endpoints + UI pages
-- [Module 3]: API endpoints + UI pages
+**Phase 2: Modules (logic and UI in parallel)**
+- BACKEND-AGENT: algorithms, ViewModel, their unit tests
+- FRONTEND-AGENT: screens bound to the UI-state contract
 
-**Validation Gate 2:** ruff check, mypy, npm lint, npm type-check
+**Validation Gate 2:** `./gradlew ktlintCheck lintDebug assembleDebug`
 
-**Phase 3: Quality (3 agents in parallel)**
-- TEST-AGENT: pytest + RTL tests, 80%+ coverage
-- REVIEW-AGENT: Security audit, performance review
-- RESEARCH-AGENT: Best practices validation
+**Phase 3: Quality (parallel)**
+- TEST-AGENT: audit and fill unit + Compose tests
+- REVIEW-AGENT: read-only review with severity and file:line
+- RESEARCH-AGENT: verify versions (AGP / Gradle / Kotlin / Compose BOM / compileSdk compatibility)
 
-**Final Validation:** Full test suite, docker build, health checks
+**Final Validation:** full Gradle pipeline, then instrumented tests and a device smoke test
+
+---
+
+## TEST PLAN
+
+[Table: area -> cases. Include "never loses" or other exhaustive checks where the logic allows]
 
 ---
 
@@ -211,30 +214,28 @@ Create `PRPs/[product-name-kebab-case]-prp.md` with this structure:
 
 | Gate | Commands |
 |------|----------|
-| 1 | `alembic upgrade head`, `npm install`, `docker-compose config` |
-| 2 | `ruff check backend/`, `npm run type-check` |
-| 3 | `pytest --cov --cov-fail-under=80`, `npm test` |
-| Final | `docker-compose up -d`, `curl localhost:8000/health` |
+| 1 | `./gradlew assembleDebug` |
+| 2 | `./gradlew ktlintCheck lintDebug` |
+| 3 | `./gradlew testDebugUnitTest jacocoTestReport` |
+| 4 | `./gradlew connectedDebugAndroidTest` (unlocked device, screen on) |
+| Final | `./gradlew clean ktlintCheck lintDebug testDebugUnitTest assembleDebug assembleRelease` |
 
 ---
 
-## ENVIRONMENT VARIABLES
+## ACCEPTANCE CRITERIA
 
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/[dbname]
-SECRET_KEY=your-secret-key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-GOOGLE_CLIENT_ID=your-client-id (if OAuth)
-GOOGLE_CLIENT_SECRET=your-secret (if OAuth)
-VITE_API_URL=http://localhost:8000
-```
+[Checklist from INITIAL.md, plus: builds, lint clean, 80%+ coverage on domain/ViewModel]
+
+---
+
+## CONFIGURATION
+
+No secrets in the repo. Release signing uses `keystore.properties` (git-ignored) or env vars.
 
 ---
 
 ## NEXT STEP
 
-Execute with parallel agents:
 /execute-prp PRPs/[product-name]-prp.md
 ```
 
@@ -251,13 +252,12 @@ PRP GENERATED
 Product: [Name]
 File: PRPs/[name]-prp.md
 Modules: [count]
-Models: [count]
-Endpoints: [count]
-Pages: [count]
+Types: [count]
+Screens/components: [count]
 
 Phases:
-1. Foundation: 4 agents parallel
-2. Modules: [X] pairs parallel
+1. Foundation: 3 agents parallel
+2. Modules: logic + UI parallel
 3. Quality: 3 agents parallel
 
 NEXT: /execute-prp PRPs/[name]-prp.md
