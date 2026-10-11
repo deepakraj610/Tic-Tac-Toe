@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Tic Tac Toe</string>
+
+    <!-- Score header -->
+    <string name="you_label">You (X)</string>
+    <string name="computer_label">Computer (O)</string>
+    <string name="draws_label">Draws</string>
+
+    <!-- Turn / result indicator -->
+    <string name="turn_your">Your turn</string>
+    <string name="turn_computer_thinking">Computer is thinking…</string>
+    <string name="result_win">You win!</string>
+    <string name="result_lose">Computer wins</string>
+    <string name="result_draw">Draw</string>
+
+    <!-- Controls -->
+    <string name="restart_game">Restart Game</string>
+    <string name="reset_score">Reset Score</string>
+    <string name="difficulty_label">Difficulty</string>
+    <string name="difficulty_easy">Easy</string>
+    <string name="difficulty_unbeatable">Unbeatable</string>
+
+    <!-- Board accessibility -->
+    <string name="cell_description">Row %1$d, column %2$d, %3$s</string>
+    <string name="cell_empty">empty</string>
+    <string name="cell_x">X</string>
+    <string name="cell_o">O</string>
+    <string name="cell_winning_suffix">%1$s, winning line</string>
+</resources>

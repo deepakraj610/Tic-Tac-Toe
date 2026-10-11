@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Grid lines (inside the 66dp adaptive-icon safe zone) -->
+    <path
+        android:pathData="M46,32L46,76M62,32L62,76M32,46L76,46M32,62L76,62"
+        android:strokeColor="#E5E7EB"
+        android:strokeLineCap="round"
+        android:strokeWidth="3" />
+    <!-- X in the top-left cell -->
+    <path
+        android:pathData="M36,36L42,42M42,36L36,42"
+        android:strokeColor="#38BDF8"
+        android:strokeLineCap="round"
+        android:strokeWidth="3" />
+    <!-- O in the center cell -->
+    <path
+        android:pathData="M48,54a6,6 0 1,0 12,0a6,6 0 1,0 -12,0"
+        android:strokeColor="#FB7185"
+        android:strokeWidth="3" />
+</vector>
